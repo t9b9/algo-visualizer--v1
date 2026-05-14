@@ -73,9 +73,20 @@ BFS.prototype.init = function(am, w, h)
 
 BFS.prototype.setup = function() 
 {
+	// Call Graph's setup first to create circles
 	BFS.superclass.setup.call(this);
+	
+	// Store the commands created by Graph's setup
+	var graphCommands = this.commands.slice(); // Copy the array
+	
+	// Now reset commands and add BFS-specific commands
 	this.messageID = new Array();
 	this.commands = new Array();
+	
+	// Add back Graph's commands
+	for (var i = 0; i < graphCommands.length; i++) {
+		this.commands.push(graphCommands[i]);
+	}
 	this.visitedID = new Array(this.size);
 	this.visitedIndexID = new Array(this.size);
 	this.parentID = new Array(this.size);
@@ -98,10 +109,10 @@ BFS.prototype.setup = function()
 	this.cmd("CreateLabel", this.nextIndex++, "Parent", PARENT_START_X - AUX_ARRAY_WIDTH, AUX_ARRAY_START_Y - AUX_ARRAY_HEIGHT * 1.5, 0);
 	this.cmd("CreateLabel", this.nextIndex++, "Visited", VISITED_START_X - AUX_ARRAY_WIDTH, AUX_ARRAY_START_Y - AUX_ARRAY_HEIGHT * 1.5, 0);
 	this.cmd("CreateLabel", this.nextIndex++, "BFS Queue", QUEUE_START_X, QUEUE_START_Y - 30, 0);
-	animationManager.setAllLayers([0, this.currentLayer]);
-	animationManager.StartNewAnimation(this.commands);
-	animationManager.skipForward();
-	animationManager.clearHistory();
+	this.animationManager.setAllLayers([0, this.currentLayer]);
+	this.animationManager.StartNewAnimation(this.commands);
+	this.animationManager.skipForward();
+	this.animationManager.clearHistory();
 	this.highlightCircleL = this.nextIndex++;
 	this.highlightCircleAL = this.nextIndex++;
 	this.highlightCircleAM= this.nextIndex++

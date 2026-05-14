@@ -266,6 +266,7 @@ Graph.prototype.graphRepChangedCallback = function(newLayer, event)
 {
 	this.animationManager.setAllLayers([0,newLayer]);
 	this.currentLayer = newLayer;
+	this.animationManager.animatedObjects.draw();
 }
 
 
