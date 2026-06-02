@@ -336,7 +336,7 @@ CCC2008S5DFS.prototype.doDFS = function()
 	this.visitingSet = {};
 	this.commands    = new Array();
 	this.messageID   = new Array();
-	this.messageY    = 10;          // 消息区起始 y（所有消息共享，动态增减）
+	this.messageY    = 0;          // 消息区起始 y（所有消息共享，动态增减）
 
 	this.cmd("CreateHighlightCircle", this.highlightCircleL,
 		HIGHLIGHT_CIRCLE_COLOR, this.getXPos(0), this.getYPos(0));
@@ -365,7 +365,7 @@ CCC2008S5DFS.prototype.getYPos = function(i) { return this.statePositions[i].y; 
 
 var MSG_BASE_X   = 1050;   // 消息区固定起始 x
 var MSG_INDENT_W = 30;    // 每层缩进宽度
-var MSG_LINE_H   = 15;    // 每行消息高度
+var MSG_LINE_H   = 13;    // 每行消息高度
 
 CCC2008S5DFS.prototype.dfsVisit = function(stateIdx, indent)
 {
