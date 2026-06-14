@@ -9,7 +9,7 @@ var UPDATE_COLOR = "#00AA00";
 var PYTHON_CODE = [
 	["def build(node, start, end):"],
 	["    if start == end:"],
-	["        tree[node] = data[start-1]"],
+	["        tree[node] = data[start]"],
 	["    else:"],
 	["        mid = (start + end) // 2"],
 	["        build(node*2, start, mid)"],
@@ -99,7 +99,7 @@ CCCSegmentTreeTest.prototype.init = function(am, w, h)
 	
 	// Hardcoded test data
 	this.n = 10;
-	this.data = [4, 8, 4, 5, 6, 3, 2, 2, 8, 1];
+	this.data = [0, 4, 8, 4, 5, 6, 3, 2, 2, 8, 1];
 	
 	this.tree = [];
 	this.circleID = [];
@@ -145,30 +145,27 @@ CCCSegmentTreeTest.prototype.setup = function()
 	var startX = 340;
 	var startY = 35;
 
-	for (var i = 0; i < this.n; i++)
+	for (var i = 0; i <= this.n; i++)
 	{
 		// 1. 创建矩形方框，并直接把数据 data[i] 作为文字填入
 		this.arrayElementID[i] = this.nextIndex++;
+		let fill = this.data[i];
+		if (fill == 0) {
+			fill = "X";
+		}
 		this.cmd("CreateRectangle", 
 			this.arrayElementID[i],           // ID
-			this.data[i],                      // 直接把数字作为Label放入框内
+			fill,                      // 直接把数字作为Label放入框内
 			cellWidth,                         // 宽度
 			cellHeight,                        // 高度
-			startX + i * cellWidth,            // X坐标 (紧密相连的阵列)
+			startX + (i) * cellWidth,     // X坐标 (紧密相连的阵列)
 			startY                             // Y坐标
 		);
 		this.cmd("SetForegroundColor", this.arrayElementID[i], "#000000");
 		this.cmd("SetBackgroundColor", this.arrayElementID[i], "#FFFFFF");
 		
-		// 2. 存储值标签的引用（为了兼容你后面 doUpdate 里的调用：idx - 1 + this.n）
-		// 因为现在数字已经内置在框里了，我们让这个 ID 指向同一个框，确保你后面的 doUpdate 不会报错
+		// 2. 存储值标签的引用（为了兼容你后面 doUpdate 里的调用）
 		this.arrayElementID[i + this.n] = this.arrayElementID[i];
-		
-		// 3. 创建索引标签 (0, 1, 2...)，手动定位在方框的上方
-		var indexLabelID = this.nextIndex++;
-		this.arrayElementID[i + this.n * 2] = indexLabelID;
-		this.cmd("CreateLabel", indexLabelID, i, startX + i * cellWidth, 10);
-		this.cmd("SetTextColor", indexLabelID, "#666666");
 	}
 	
 	// Create tree array display below array
@@ -228,9 +225,9 @@ CCCSegmentTreeTest.prototype.updateCallback = function(event)
 {
 	var idx = parseInt(this.updateIndexInput.value);
 	var val = parseInt(this.updateValueInput.value);
-	if (isNaN(idx) || isNaN(val) || idx < 0 || idx >= this.n)
+	if (isNaN(idx) || isNaN(val) || idx < 1 || idx > this.n)
 	{
-		alert("Invalid input. Index must be between 0 and " + (this.n - 1));
+		alert("Invalid input. Index must be between 1 and " + this.n);
 		return;
 	}
 	this.implementAction(this.doUpdate.bind(this, idx, val));
@@ -240,9 +237,9 @@ CCCSegmentTreeTest.prototype.queryCallback = function(event)
 {
 	var start = parseInt(this.queryStartInput.value);
 	var end = parseInt(this.queryEndInput.value);
-	if (isNaN(start) || isNaN(end) || start < 0 || end >= this.n || start > end)
+	if (isNaN(start) || isNaN(end) || start < 1 || end > this.n || start > end)
 	{
-		alert("Invalid input. Start and end must be between 0 and " + (this.n - 1) + ", with start <= end");
+		alert("Invalid input. Start and end must be between 1 and " + this.n + ", with start <= end");
 		return;
 	}
 	this.implementAction(this.doQuery.bind(this, start, end));
@@ -358,10 +355,10 @@ CCCSegmentTreeTest.prototype.build = function(node, start, end, indent)
 		this.cmd("Step");
 		this.highlightCodeLine(1, false);
 		
-		this.highlightCodeLine(2, true);  // tree[node] = data[start-1]
-		this.tree[node] = this.data[start - 1];
-		// Store the actual range (0-based for display)
-		this.nodeRange[node] = { start: start - 1, end: end - 1 };
+		this.highlightCodeLine(2, true);  // tree[node] = data[start]
+		this.tree[node] = this.data[start];
+		// Store the actual range (1-based)
+		this.nodeRange[node] = { start: start, end: end };
 		// Add message with indent alignment
 		var leafMsgID = this.nextIndex++;
 		this.messageID.push(leafMsgID);
@@ -390,8 +387,8 @@ CCCSegmentTreeTest.prototype.build = function(node, start, end, indent)
 		
 		this.highlightCodeLine(7, true);  // tree[node] = sum
 		this.tree[node] = this.tree[node * 2] + this.tree[node * 2 + 1];
-		// Store the actual range (0-based for display)
-		this.nodeRange[node] = { start: start - 1, end: end - 1 };
+		// Store the actual range (1-based)
+		this.nodeRange[node] = { start: start, end: end };
 		// Add message with indent alignment
 		var internalMsgID = this.nextIndex++;
 		this.messageID.push(internalMsgID);
@@ -530,7 +527,7 @@ CCCSegmentTreeTest.prototype.doUpdate = function(idx, val)
 	this.cmd("Step");
 	this.highlightCodeLine(9, false);
 	
-	this._update(1, 1, this.n, idx + 1, val);
+	this._update(1, 1, this.n, idx, val);
 	
 	// Update array display
 	if (this.arrayElementID[idx + this.n]) {
@@ -676,7 +673,7 @@ CCCSegmentTreeTest.prototype.doQuery = function(l, r)
 	this.cmd("Step");
 	this.highlightCodeLine(20, false);
 	
-	var result = this._query(1, 1, this.n, l + 1, r + 1);
+	var result = this._query(1, 1, this.n, l, r);
 	
 	this.addMessage("Query result: " + result);
 	var resultID = this.nextIndex++;
